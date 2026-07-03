@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>たねまき アプリのたな</title>
+<meta name="description" content="対話型算数スクール たねまき の学習アプリ一覧">
+<style>
+:root {
+  /* 親向けページ基調（design.md §8） */
+  --bg:     #FFF8EF;
+  --panel:  #ffffff;
+  --main:   #4DBCBC;
+  --accent: #F7931E;
+  --ink:    #3C2415;
+  --sub:    #7a685f;
+  /* カテゴリ色（テーマGのやわらか原色） */
+  --c-kazu:    #4dabf7;
+  --c-keisan:  #51cf66;
+  --c-tokei:   #F7931E;
+  --c-hakaru:  #4DBCBC;
+  --gold:      #ffd166;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Hiragino Maru Gothic ProN", "Yu Gothic Medium", "Noto Sans JP", system-ui, sans-serif;
+}
+.wrap { max-width: 520px; margin: 0 auto; padding: 0 14px 110px; }
+
+/* ヘッダー */
+header { text-align: center; padding: 22px 0 4px; }
+header h1 { font-size: 24px; font-weight: 800; letter-spacing: .04em; }
+header h1 .seed { color: var(--accent); }
+header p { font-size: 12px; color: var(--sub); margin-top: 4px; }
+
+/* 検索 */
+.searchbox { position: relative; margin: 14px 0 10px; }
+.searchbox input {
+  width: 100%; padding: 12px 14px 12px 42px;
+  border: 2px solid var(--main); border-radius: 999px;
+  font-size: 16px; font-family: inherit; color: var(--ink);
+  background: var(--panel); outline: none;
+}
+.searchbox input:focus { border-color: var(--accent); }
+.searchbox .icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 16px; }
+
+/* タブ */
+.tabs { display: flex; gap: 8px; overflow-x: auto; padding: 6px 2px 10px; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  flex: 0 0 auto; border: none; cursor: pointer;
+  padding: 9px 16px; border-radius: 999px;
+  font-family: inherit; font-size: 15px; font-weight: 800; color: #fff;
+  box-shadow: 0 2px 0 rgba(0,0,0,.15);
+  opacity: .45; transition: opacity .15s, transform .05s;
+}
+.tab.active { opacity: 1; }
+.tab:active { transform: translateY(1px); box-shadow: 0 1px 0 rgba(0,0,0,.15); }
+.tab .n { font-size: 11px; font-weight: 700; opacity: .85; margin-left: 3px; }
+.tab-all    { background: var(--ink); }
+.tab-kazu   { background: var(--c-kazu); }
+.tab-keisan { background: var(--c-keisan); }
+.tab-tokei  { background: var(--c-tokei); }
+.tab-hakaru { background: var(--c-hakaru); }
+
+/* カード */
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.card {
+  display: block; text-decoration: none; color: var(--ink);
+  background: var(--panel); border-radius: 16px;
+  padding: 14px 12px 12px; position: relative;
+  border-top: 5px solid var(--gold);
+  box-shadow: 0 2px 6px rgba(60,36,21,.08);
+  transition: transform .05s;
+}
+.card:active { transform: translateY(2px); }
+.card.cat-kazu   { border-top-color: var(--c-kazu); }
+.card.cat-keisan { border-top-color: var(--c-keisan); }
+.card.cat-tokei  { border-top-color: var(--c-tokei); }
+.card.cat-hakaru { border-top-color: var(--c-hakaru); }
+.card .emoji { font-size: 30px; line-height: 1; }
+.card .name { font-size: 15px; font-weight: 800; line-height: 1.35; margin-top: 6px; }
+.card .desc { font-size: 12px; color: var(--sub); line-height: 1.45; margin-top: 4px; }
+.card .age {
+  position: absolute; top: 10px; right: 10px;
+  background: var(--gold); color: var(--ink);
+  font-size: 11px; font-weight: 800;
+  padding: 3px 8px; border-radius: 999px;
+}
+.badges { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
+.chip {
+  font-size: 10px; font-weight: 700; color: var(--sub);
+  background: var(--bg); border-radius: 999px; padding: 2px 7px;
+}
+.chip.special { color: #fff; background: var(--accent); }
+
+.empty { text-align: center; color: var(--sub); font-size: 14px; padding: 40px 0; display: none; }
+.empty .big { font-size: 40px; margin-bottom: 8px; }
+
+/* 個別サポボタン（常設） */
+.support {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+  padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, var(--bg) 70%, rgba(255,248,239,0));
+  display: flex; justify-content: center;
+}
+.support a {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; max-width: 492px; min-height: 52px;
+  background: var(--main); color: #fff; text-decoration: none;
+  font-size: 16px; font-weight: 800; border-radius: 999px;
+  box-shadow: 0 5px 12px rgba(0,0,0,.16);
+  transition: transform .05s;
+}
+.support a:active { transform: translateY(2px); box-shadow: 0 2px 6px rgba(0,0,0,.16); }
+.support a .small { font-size: 11px; font-weight: 700; opacity: .9; }
+
+footer { text-align: center; font-size: 11px; color: var(--sub); padding: 26px 0 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>たねまき<span class="seed">🌱</span>アプリのたな</h1>
+    <p>すきなアプリを えらんで あそぼう</p>
+  </header>
+
+  <div class="searchbox">
+    <span class="icon">🔍</span>
+    <input id="search" type="search" placeholder="なまえ・キーワードで さがす" autocomplete="off">
+  </div>
+
+  <div class="tabs" id="tabs"></div>
+
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty"><div class="big">🌱</div>みつからなかったよ<br>ことばを かえて さがしてみてね</div>
+
+  <footer>対話型算数スクール たねまき</footer>
+</div>
+
+<div class="support">
+  <a href="https://lin.ee/Zol9wqJ" target="_blank" rel="noopener">
+    💬 こまったら そうだん <span class="small">（公式LINE）</span>
+  </a>
+</div>
+
+<script>
+// カテゴリ定義
+const CATS = {
+  kazu:   { label: '🔢 かず' },
+  keisan: { label: '➕ けいさん' },
+  tokei:  { label: '🕐 とけい' },
+  hakaru: { label: '📏 はかる' },
+};
+
+// アプリデータ（1アプリ1エントリ・ここだけ編集すればよい）
+// chikara=つくちから / tsumazuki=つまずきワード / next=つぎのステップ(id)
+// ※chikara・tsumazuki・next は「つまずきから探す」機能（次フェーズ）の土台。検索対象には既に含まれる
+const APPS = [
+  // ── かず ──────────────────────────────
+  { id: 'howmanyapples', cat: 'kazu', emoji: '🍎', age: 4,
+    name: 'りんご なんこ？',
+    desc: 'りんごを かぞえて こたえよう',
+    url: 'https://pokopy-talkpapa.github.io/howmanyapples/',
+    kw: ['りんご', 'かぞえる', 'すうじ'],
+    chikara: ['かぞえる', 'かずとすうじのいっち'],
+    tsumazuki: ['ゆびでかぞえられない', 'かずがよめない'],
+    next: 'howmanyapples_trial01' },
+  { id: 'howmanyapples_trial01', cat: 'kazu', emoji: '🍎', age: 4,
+    name: 'りんごの かずと すうじ',
+    desc: 'りんごの かずに あう すうじを えらぶ',
+    url: 'https://pokopy-talkpapa.github.io/howmanyapples_trial01/',
+    kw: ['りんご', 'すうじ', 'カード'],
+    chikara: ['かずとすうじのいっち'],
+    tsumazuki: ['かずとすうじがつながらない'],
+    next: 'howmanyapples_trial03' },
+  { id: 'howmanyapples_trial03', cat: 'kazu', emoji: '🍩', age: 5,
+    name: 'あわせて なんこ？',
+    desc: 'いろいろな ものを あわせて かぞえる',
+    url: 'https://pokopy-talkpapa.github.io/howmanyapples_trial03/',
+    kw: ['あわせて', 'ドーナツ', 'たしざんのまえ'],
+    chikara: ['あわせるかんかく', 'たしざんのじゅんび'],
+    tsumazuki: ['たしざんのいみがわからない'],
+    next: 'shiki_kotae' },
+  { id: 'shiki_kotae', cat: 'kazu', emoji: '🍎', age: 6,
+    name: 'りんごカードで しきと こたえ',
+    desc: 'りんごの カードと しき・こたえを つなげる',
+    url: 'https://pokopy-talkpapa.github.io/1mm-mathematics/tashizan/shiki-kotae/',
+    kw: ['しき', 'たしざん', 'カード'],
+    chikara: ['しきによむちから'],
+    tsumazuki: ['しきのいみがわからない'],
+    next: null },
+  { id: 'ringo_ato_nanko', cat: 'kazu', emoji: '🍎', age: 5,
+    name: 'りんご あと なんこ？',
+    desc: '10こに するには あと なんこ？',
+    url: 'https://pokopy-talkpapa.github.io/ringo_ato_nanko/',
+    kw: ['10のともだち', 'ほすう', 'あといくつ'],
+    chikara: ['10のごうせい・ぶんかい'],
+    tsumazuki: ['くりあがりのじゅんび'],
+    next: '10apples_trial' },
+  { id: '10apples_trial', cat: 'kazu', emoji: '🍎', age: 5,
+    name: 'りんごカードで 10づくり',
+    desc: 'えカードだけで 10を つくる',
+    url: 'https://pokopy-talkpapa.github.io/10apples_trial/',
+    kw: ['10のともだち', 'カード', 'ゲーム'],
+    chikara: ['10のごうせい・ぶんかい'],
+    tsumazuki: ['くりあがりのじゅんび'],
+    next: 'ringo_ato_nanko_trial01' },
+  { id: 'ringo_ato_nanko_trial01', cat: 'kazu', emoji: '🍎', age: 5,
+    name: 'りんごカードで 10のともだち',
+    desc: 'カードを みて 10の ほすうを こたえる',
+    url: 'https://pokopy-talkpapa.github.io/ringo_ato_nanko_trial01/',
+    kw: ['10のともだち', 'ほすう', 'ゲーム'],
+    chikara: ['10のごうせい・ぶんかい'],
+    tsumazuki: ['くりあがりのじゅんび'],
+    next: 'suuji_ato_nanko' },
+  { id: 'suuji_ato_nanko', cat: 'kazu', emoji: '🔟', age: 5,
+    name: '10まで あと いくつ？',
+    desc: 'すうじだけで 10の ともだちを こたえる',
+    url: 'https://pokopy-talkpapa.github.io/suuji_ato_nanko/',
+    kw: ['10のともだち', 'ほすう', 'すうじ'],
+    chikara: ['10のごうせい・ぶんかい'],
+    tsumazuki: ['くりあがりのじゅんび'],
+    next: 'coin10' },
+  { id: 'coin10', cat: 'kazu', emoji: '🪙', age: 6,
+    name: '10コインルーレット',
+    desc: 'ルーレットを まわして 10の ともだち',
+    url: 'https://pokopy-talkpapa.github.io/10coin-roulette/',
+    kw: ['ルーレット', '10のともだち', '10えんだま'],
+    chikara: ['10のごうせい・ぶんかい'],
+    tsumazuki: ['くりあがりのじゅんび'],
+    next: 'coin10w' },
+  { id: 'coin10w', cat: 'kazu', emoji: '🪙', age: 6,
+    name: '10コインルーレット ダブル',
+    desc: 'ふたつ 同時に 10の ともだち',
+    url: 'https://pokopy-talkpapa.github.io/10coin-roulette-double/',
+    kw: ['ルーレット', '10のともだち', 'ふたつ'],
+    chikara: ['10のごうせい・ぶんかい'],
+    tsumazuki: [],
+    next: null },
+  { id: 'kazu_yomi', cat: 'kazu', emoji: '🗣️', age: 7,
+    name: 'かずよみ（3けた）',
+    desc: '3けたの かずを こえに だして よむ',
+    url: 'https://pokopy-talkpapa.github.io/kazu-yomi/',
+    kw: ['くらい', '100', '1000', 'こえ', 'おんせい'],
+    chikara: ['くらいどり', '大きなかずをよむ'],
+    tsumazuki: ['3けたがよめない', 'くらいがわからない'],
+    next: 'okane_v2' },
+  { id: 'okane_v2', cat: 'kazu', emoji: '💰', age: 6,
+    name: 'おかねと すうじ',
+    desc: 'コインで くらいどりが みえてくる',
+    url: 'https://pokopy-talkpapa.github.io/okane-to-suuji-v2/',
+    kw: ['おかね', 'くらい', '100えん', '10えん', 'よみあげ'],
+    chikara: ['くらいどり'],
+    tsumazuki: ['くらいがわからない', '345の4のいみ'],
+    next: 'oyako_okane' },
+  { id: 'oyako_okane', cat: 'kazu', emoji: '👨‍👧', age: 6,
+    name: 'おやこで おかね',
+    desc: 'こどもが よんで おとなが ○×',
+    url: 'https://pokopy-talkpapa.github.io/oyako-de-okane/',
+    kw: ['おかね', 'おやこ', 'いくら', 'こえ'],
+    chikara: ['きんがくをよむ', 'くらいどり'],
+    tsumazuki: ['おかねがかぞえられない'],
+    next: null },
+
+  // ── けいさん ──────────────────────────
+  { id: 'make10_1', cat: 'keisan', emoji: '🃏', age: 6,
+    name: '3つのかずの たしざん ①',
+    desc: 'イラストで 3つの かずを たす',
+    url: 'https://sites.google.com/view/make10-card',
+    kw: ['たしざん', '3つ', 'くりあがり'],
+    chikara: ['くりあがりのたしざん'],
+    tsumazuki: ['くりあがりでとまる'],
+    next: 'make10_2' },
+  { id: 'make10_2', cat: 'keisan', emoji: '🃏', age: 6,
+    name: '3つのかずの たしざん ②',
+    desc: 'イラストと すうじを きりかえられる',
+    url: 'https://sites.google.com/view/threecardskirikae',
+    kw: ['たしざん', '3つ', 'くりあがり'],
+    chikara: ['くりあがりのたしざん'],
+    tsumazuki: ['くりあがりでとまる'],
+    next: 'make10_3' },
+  { id: 'make10_3', cat: 'keisan', emoji: '🃏', age: 6,
+    name: '3つのかずの たしざん ③',
+    desc: 'じんわり きえていく むずかしいばん',
+    url: 'https://sites.google.com/view/threecardslevel2',
+    kw: ['たしざん', '3つ', 'くりあがり'],
+    chikara: ['くりあがりのたしざん'],
+    tsumazuki: ['くりあがりでとまる'],
+    next: null },
+  { id: 'tashizan_mh', cat: 'keisan', emoji: '🍬', age: 6,
+    name: 'あわせて いくつ？',
+    desc: 'ひきざんの じゅんびになる たしざん',
+    url: 'https://pokopy-talkpapa.github.io/tashizan_migi_hidari/',
+    kw: ['ひきざんじゅんび', 'たしざん'],
+    chikara: ['ひきざんのじゅんび'],
+    tsumazuki: ['ひきざんのいみがわからない'],
+    next: 'kurisagari_steps' },
+  { id: 'kurisagari_steps', cat: 'keisan', emoji: '🪜', age: 6,
+    name: 'ひきざん 6ステップ',
+    desc: 'くりさがりを 6だんかいで じっくり',
+    url: 'https://pokopy-talkpapa.github.io/kurisagari_steps/',
+    kw: ['ひきざん', 'くりさがり', 'ステップ'],
+    chikara: ['くりさがりのひきざん'],
+    tsumazuki: ['くりさがりでとまる', 'ひきざんがおそい'],
+    next: 'hissan_steps' },
+  { id: 'hissan_tashizan', cat: 'keisan', emoji: '📝', age: 7,
+    name: 'たしざんの ひっさん',
+    desc: 'たてならびの けいさんに なれる',
+    url: 'https://pokopy-talkpapa.github.io/hissan_tashizan01/',
+    kw: ['ひっさん', 'たしざん', 'たてがき'],
+    chikara: ['ひっさんのかたち'],
+    tsumazuki: ['ひっさんになるとまちがえる'],
+    next: 'kuriagari_ari' },
+  { id: 'kuriagari_ari', cat: 'keisan', emoji: '🤔', age: 7,
+    name: 'くりあがる？',
+    desc: 'くりあがるか どうかを ぱっと みぬく',
+    url: 'https://pokopy-talkpapa.github.io/kuri-agari-ari/',
+    kw: ['ひっさん', 'たしざん', 'くりあがり', 'はんだん'],
+    chikara: ['くりあがりのみきわめ'],
+    tsumazuki: ['くりあがりをわすれる'],
+    next: null },
+  { id: 'kurisagari_ari', cat: 'keisan', emoji: '🤔', age: 7,
+    name: 'くりさがる？',
+    desc: 'くりさがるか どうかを ぱっと みぬく',
+    url: 'https://pokopy-talkpapa.github.io/kurisagari-ari/',
+    kw: ['ひっさん', 'ひきざん', 'くりさがり', 'はんだん'],
+    chikara: ['くりさがりのみきわめ'],
+    tsumazuki: ['くりさがりをわすれる'],
+    next: 'hissan_steps' },
+  { id: 'hissan_steps', cat: 'keisan', emoji: '🪜', age: 7,
+    name: 'ひきざんの ひっさん 6ステップ',
+    desc: 'ヒントつきで じっくり れんしゅう',
+    url: 'https://pokopy-talkpapa.github.io/hissan_steps/',
+    kw: ['ひっさん', 'ひきざん', 'くりさがり', 'ヒント'],
+    chikara: ['くりさがりのひっさん'],
+    tsumazuki: ['くりさがりでとまる'],
+    next: 'hikizan_challenge' },
+  { id: 'hikizan_challenge', cat: 'keisan', emoji: '🔥', age: 7,
+    name: 'ひきざん チャレンジ',
+    desc: 'ゲームで スピードアップ！',
+    url: 'https://pokopy-talkpapa.github.io/hissan_hikizan_challenge/',
+    kw: ['ひっさん', 'ひきざん', 'くりさがり', 'ゲーム', '30びょう'],
+    chikara: ['くりさがりのひっさん'],
+    tsumazuki: ['ひきざんがおそい'],
+    next: 'hissan2_steps' },
+  { id: 'hissan2_steps', cat: 'keisan', emoji: '🪜', age: 7,
+    name: '2けたの ひきざんの ひっさん',
+    desc: '2けた−2けたに ちょうせん',
+    url: 'https://pokopy-talkpapa.github.io/hissan2_steps/',
+    kw: ['ひっさん', 'ひきざん', '2けた', 'くりさがり'],
+    chikara: ['くりさがりのひっさん'],
+    tsumazuki: ['2けたになるとまちがえる'],
+    next: null },
+  { id: 'warizan_kakeru', cat: 'keisan', emoji: '➗', age: 8,
+    name: 'かけるかずを もとめる',
+    desc: 'わりざんの かんがえかたを つくる',
+    url: 'https://pokopy-talkpapa.github.io/1mm-mathematics/warizan/kakeru-kazu/',
+    kw: ['わりざん', 'かけざん', 'くく'],
+    chikara: ['わりざんのじゅんび'],
+    tsumazuki: ['わりざんのいみがわからない'],
+    next: null },
+  { id: 'kansu_box', cat: 'keisan', emoji: '📦', age: 9,
+    name: 'かんすうボックス',
+    desc: 'かずの へんしんルールを みつけよう',
+    url: 'https://pokopy-talkpapa.github.io/kansu_box/',
+    kw: ['かんすう', 'ひれい', 'きまり', 'ともなってかわる'],
+    chikara: ['かんけいをみつける'],
+    tsumazuki: ['ひれいがわからない'],
+    next: null },
+
+  // ── とけい ──────────────────────────
+  { id: 'nanji_nanjihan', cat: 'tokei', emoji: '🕐', age: 5,
+    name: 'なんじ・なんじはん？',
+    desc: 'とけいよみの さいしょの いっぽ',
+    url: 'https://pokopy-talkpapa.github.io/nanji-nanjihan/',
+    kw: ['とけい', 'なんじ', 'はん'],
+    chikara: ['○じ・○じはんをよむ'],
+    tsumazuki: ['とけいがよめない'],
+    next: 'nanji_bingo_full' },
+  { id: 'tanemaki_tokei', cat: 'tokei', emoji: '🕐', age: 5, demo: true,
+    name: 'よーめる とけい',
+    desc: 'おうちのひとと いっしょに うごかす とけい',
+    url: 'https://pokopy-talkpapa.github.io/tanemaki-tokei/',
+    kw: ['とけい', 'なんじ', 'デモ', 'おやこ'],
+    chikara: ['○じ・○じはんをよむ'],
+    tsumazuki: ['とけいがよめない'],
+    next: 'tokei_full' },
+  { id: 'nanji_bingo_full', cat: 'tokei', emoji: '🎯', age: 5,
+    name: 'よーめる とけいビンゴ',
+    desc: 'ビンゴで なんじ・なんじはん',
+    url: 'https://pokopy-talkpapa.github.io/nanji-bingo-full/',
+    kw: ['とけい', 'ビンゴ', 'なんじ', 'はん'],
+    chikara: ['○じ・○じはんをよむ'],
+    tsumazuki: ['とけいがよめない'],
+    next: 'only_nanpun' },
+  { id: 'tokei_full', cat: 'tokei', emoji: '🕐', age: 6, demo: true,
+    name: 'よーめる とけい ぜんぶのふん',
+    desc: '1ぷんきざみで じこくを つくれる とけい',
+    url: 'https://pokopy-talkpapa.github.io/tanemaki-tokei-full/',
+    kw: ['とけい', 'なんぷん', 'デモ', 'おやこ'],
+    chikara: ['なんじなんぷんをよむ'],
+    tsumazuki: ['ふんがよめない'],
+    next: null },
+  { id: 'only_nanpun', cat: 'tokei', emoji: '🕒', age: 6,
+    name: 'いま なんぷん？',
+    desc: 'ながいはりだけに しゅうちゅう',
+    url: 'https://pokopy-talkpapa.github.io/only-nanpun/',
+    kw: ['とけい', 'なんぷん', 'ながいはり'],
+    chikara: ['ふんをよむ'],
+    tsumazuki: ['ふんがよめない'],
+    next: 'slide_nanpun' },
+  { id: 'slide_nanpun', cat: 'tokei', emoji: '🕒', age: 6,
+    name: 'スライド なんぷん？',
+    desc: 'はりを スライドさせて ふんを よむ',
+    url: 'https://sites.google.com/view/slide-nanpun',
+    kw: ['とけい', 'なんぷん', 'スライド'],
+    chikara: ['ふんをよむ'],
+    tsumazuki: ['ふんがよめない'],
+    next: 'tokei_bingo_nanpun' },
+  { id: 'tokei_bingo_nanpun', cat: 'tokei', emoji: '🎯', age: 6,
+    name: 'とけいビンゴ｜なんぷん',
+    desc: 'ビンゴで なんぷんよみ',
+    url: 'https://sites.google.com/view/tokei-bingo',
+    kw: ['とけい', 'ビンゴ', 'なんぷん'],
+    chikara: ['ふんをよむ'],
+    tsumazuki: ['ふんがよめない'],
+    next: 'nanpungo' },
+  { id: 'nanpungo', cat: 'tokei', emoji: '⏩', age: 7,
+    name: '○ふんごの じこくは？',
+    desc: 'すこし あとの じこくを かんがえる',
+    url: 'https://pokopy-talkpapa.github.io/nanpungo-ha-nanji/',
+    kw: ['とけい', 'なんぷんご', 'じかんのけいさん'],
+    chikara: ['じこくとじかん'],
+    tsumazuki: ['なんぷんごがわからない'],
+    next: 'nanpungo_quiz' },
+  { id: 'nanpungo_quiz', cat: 'tokei', emoji: '⏩', age: 7,
+    name: '○ふんごクイズ',
+    desc: 'クイズで じこくの けいさん',
+    url: 'https://sites.google.com/view/nanpungo-ha-nanji-quiz',
+    kw: ['とけい', 'なんぷんご', 'クイズ'],
+    chikara: ['じこくとじかん'],
+    tsumazuki: ['なんぷんごがわからない'],
+    next: null },
+  { id: 'tokei_song', cat: 'tokei', emoji: '🎵', age: 4, song: true,
+    name: 'ちょうどとはん（うた）',
+    desc: 'うたで おぼえる ちょうどと はん',
+    url: 'https://suno.com/s/12Zb1W9e0HJeDNnU',
+    kw: ['うた', 'とけい', 'ちょうど', 'はん'],
+    chikara: ['○じ・○じはんをよむ'],
+    tsumazuki: [],
+    next: 'nanji_nanjihan' },
+
+  // ── はかる ──────────────────────────
+  { id: 'monosashi', cat: 'hakaru', emoji: '📏', age: 7,
+    name: 'ものさし',
+    desc: 'めもりを よむ れんしゅう（10cmまで）',
+    url: 'https://pokopy-talkpapa.github.io/monosashi/',
+    kw: ['ながさ', 'めもり', 'じょうぎ', 'cm', 'mm'],
+    chikara: ['めもりをよむ'],
+    tsumazuki: ['めもりがよめない', 'ものさしがにがて'],
+    next: 'mmcmmkm' },
+  { id: 'mmcmmkm', cat: 'hakaru', emoji: '📐', age: 7,
+    name: 'mm・cm・m・km',
+    desc: 'ながさの たんいに なれる',
+    url: 'https://sites.google.com/view/mmcmmkm',
+    kw: ['ながさ', 'たんい', 'センチ', 'メートル'],
+    chikara: ['たんいのかんかく'],
+    tsumazuki: ['たんいがわからない'],
+    next: null },
+  { id: 'aburawake', cat: 'hakaru', emoji: '🫗', age: 7,
+    name: 'あぶらわけ',
+    desc: 'うつして はかる みずのかさパズル',
+    url: 'https://pokopy-talkpapa.github.io/aburawake/',
+    kw: ['かさ', 'L', 'dL', 'パズル', 'みず'],
+    chikara: ['かさのかんかく', 'ろんりてきしこう'],
+    tsumazuki: ['かさのたんいがわからない'],
+    next: null },
+  { id: 'mogura', cat: 'hakaru', emoji: '🐹', age: 8,
+    name: 'いいかげんな もぐらたたき',
+    desc: 'はやさの かんかくで あそぶ',
+    url: 'https://sites.google.com/view/speedmogura',
+    kw: ['はやさ', 'そくど', 'ゲーム'],
+    chikara: ['はやさのかんかく'],
+    tsumazuki: ['はやさがわからない'],
+    next: null },
+];
+
+// ── 表示 ─────────────────────────────
+const grid = document.getElementById('grid');
+const tabsEl = document.getElementById('tabs');
+const emptyEl = document.getElementById('empty');
+const searchEl = document.getElementById('search');
+let activeCat = 'all';
+
+// カタカナ→ひらがな正規化（検索用）
+function norm(s) {
+  return (s || '').toLowerCase()
+    .replace(/[ァ-ヶ]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x60))
+    .replace(/[\s　]/g, '');
+}
+
+function haystack(app) {
+  return norm([app.name, app.desc, ...(app.kw||[]), ...(app.chikara||[]), ...(app.tsumazuki||[])].join(' '));
+}
+
+function renderTabs() {
+  const counts = { all: APPS.length };
+  for (const a of APPS) counts[a.cat] = (counts[a.cat] || 0) + 1;
+  let html = `<button class="tab tab-all ${activeCat==='all'?'active':''}" data-cat="all">ぜんぶ<span class="n">${counts.all}</span></button>`;
+  for (const [key, c] of Object.entries(CATS)) {
+    html += `<button class="tab tab-${key} ${activeCat===key?'active':''}" data-cat="${key}">${c.label}<span class="n">${counts[key]||0}</span></button>`;
+  }
+  tabsEl.innerHTML = html;
+}
+
+function render() {
+  const q = norm(searchEl.value);
+  const shown = APPS.filter(a =>
+    (activeCat === 'all' || a.cat === activeCat) &&
+    (!q || haystack(a).includes(q))
+  );
+  grid.innerHTML = shown.map(a => `
+    <a class="card cat-${a.cat}" href="${a.url}" target="_blank" rel="noopener">
+      <span class="age">${a.age}さい〜</span>
+      <div class="emoji">${a.emoji}</div>
+      <div class="name">${a.name}</div>
+      <div class="desc">${a.desc}</div>
+      <div class="badges">
+        ${a.song ? '<span class="chip special">♪ うた</span>' : ''}
+        ${a.demo ? '<span class="chip special">おやこで</span>' : ''}
+        ${(a.chikara||[]).slice(0,2).map(t => `<span class="chip">${t}</span>`).join('')}
+      </div>
+    </a>`).join('');
+  emptyEl.style.display = shown.length ? 'none' : 'block';
+}
+
+tabsEl.addEventListener('click', e => {
+  const btn = e.target.closest('.tab');
+  if (!btn) return;
+  activeCat = btn.dataset.cat;
+  renderTabs();
+  render();
+});
+searchEl.addEventListener('input', render);
+
+renderTabs();
+render();
+</script>
+</body>
+</html>
