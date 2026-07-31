@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "tanemaki-apps",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8931", "--directory", "/Users/pokopy/Workspace/tanemaki-apps"],
+      "port": 8931
+    }
+  ]
+}
